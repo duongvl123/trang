@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bầu Trời Lời Chúc Sinh Nhật</title>
+    <style>
+        /* Thiết kế nền vũ trụ không gian tối để chữ nổi bật */
+        body {
+            margin: 0;
+            padding: 0;
+            background: radial-gradient(circle at center, #1b0d3a, #020208);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            min-height: 100vh;
+            overflow: hidden;
+            position: relative;
+        }
+
+        /* Khung tương tác cố định ở giữa màn hình */
+        .control-panel {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            padding: 30px;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.5);
+            border: 1px solid rgba(255,255,255,0.2);
+            text-align: center;
+            z-index: 100;
+            width: 350px;
+            max-width: 90%;
+        }
+
+        .control-panel h2 {
+            color: #fff;
+            margin-top: 0;
+            text-shadow: 0 0 10px #ff007f;
+            font-size: 1.5rem;
+        }
+
+        /* Ô nhập nội dung lời chúc */
+        .input-box {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #00f0ff;
+            background: rgba(0,0,0,0.4);
+            color: #fff;
+            border-radius: 25px;
+            font-size: 1rem;
+            box-sizing: border-box;
+            outline: none;
+            margin-bottom: 15px;
+            transition: all 0.3s;
+        }
+
+        .input-box:focus {
+            box-shadow: 0 0 15px #00f0ff;
+        }
+
+        /* Nút bấm gửi lời chúc */
+        .btn-send {
+            background: linear-gradient(135deg, #00f0ff, #ff007f);
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            font-size: 1rem;
+            font-weight: bold;
+            border-radius: 25px;
+            cursor: pointer;
+            box-shadow: 0 5px 15px rgba(255, 0, 127, 0.4);
+            width: 100%;
+            text-transform: uppercase;
+            transition: transform 0.2s;
+        }
+
+        .btn-send:hover {
+            transform: scale(1.03);
+            box-shadow: 0 5px 25px rgba(0, 240, 255, 0.6);
+        }
+
+        /* ĐỊNH NGHĨA CHỮ BAY TỪ DƯỚI LÊN */
+        .flying-text {
+            position: absolute;
+            bottom: -100px; /* Bắt đầu khuất dưới đáy màn hình */
+            white-space: nowrap;
+            font-weight: bold;
+            pointer-events: none; /* Tránh bị lỗi khi click nhầm vào chữ */
+            animation: floatUpAnimation var(--duration) linear infinite;
+            animation-delay: var(--delay);
+            left: var(--left-pos);
+            font-size: var(--font-size);
+            color: var(--text-color);
+            text-shadow: var(--shadow);
+            opacity: 0;
+            z-index: 10;
+        }
+
+        /* Thuật toán tạo chuyển động bay từ dưới lên, hơi lắc lư và lặp lại */
+        @keyframes floatUpAnimation {
+            0% {
+                transform: translateY(0) rotate(0deg);
+                opacity: 0;
+            }
+            10% {
+                opacity: 1; /* Bay lên một chút thì hiện rõ */
+            }
+            90% {
+                opacity: 1;
+            }
+            100% {
+                transform: translateY(-120vh) rotate(var(--rotate-deg)); /* Bay quá đỉnh màn hình */
+                opacity: 0;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Bảng nhập lời chúc ở trung tâm -->
+    <div class="control-panel">
+        <h2>🎂 Gửi Lời Chúc Sinh Nhật 🎂</h2>
+        <input type="text" id="wishInput" class="input-box" placeholder="Nhập lời chúc của bạn vào đây..." value="Happy Birthday! 🎉">
+        <button class="btn-send" onclick="addNewWish()">Thả Chữ Bay</button>
+    </div>
+
+    <!-- Nơi chứa các chữ đang bay -->
+    <div id="sky-container"></div>
+
+    <script>
+        // Danh sách các màu sắc Neon ngẫu nhiên cho chữ
+        const colors = ['#ff007f', '#00f0ff', '#00ff66', '#ffb3c6', '#ffff00', '#ff9f1c'];
+        const container = document.getElementById('sky-container');
+
+        // Hàm tạo một dòng chữ bay lên trời
+        function createTextBubble(text, isInitial = false) {
+            const span = document.createElement('span');
+            span.className = 'flying-text';
+            span.innerText = text;
+
+            // Tạo các thông số ngẫu nhiên để chữ bay tự nhiên không bị trùng nhau
+            const leftPos = Math.random() * 85; // Vị trí xuất hiện từ trái qua phải (0% - 85%)
+            const duration = 6 + Math.random() * 6; // Tốc độ bay (từ 6 giây đến 12 giây)
+            const delay = isInitial ? -(Math.random() * 10) + 's' : '0s'; // Nếu là chữ có sẵn thì cho bay ngay lập tức
+            const fontSize = (1.2 + Math.random() * 1.3) + 'rem'; // Kích thước chữ to nhỏ ngẫu nhiên
+            const randomColor = colors[Math.floor(Math.random() * colors.length)]; // Chọn màu ngẫu nhiên
+            const rotateDeg = (Math.random() * 40 - 20) + 'deg'; // Góc nghiêng khi bay lên (-20 độ đến 20 độ)
+
+            // Truyền các biến ngẫu nhiên này vào cấu trúc CSS
+            span.style.setProperty('--left-pos', leftPos + '%');
+            span.style.setProperty('--duration', duration + 's');
+            span.style.setProperty('--delay', delay);
+            span.style.setProperty('--font-size', fontSize);
+            span.style.setProperty('--text-color', randomColor);
+            span.style.setProperty('--rotate-deg', rotateDeg);
+            span.style.setProperty('--shadow', `0 0 10px ${randomColor}, 0 0 20px rgba(0,0,0,0.5)`);
+
+            container.appendChild(span);
+        }
+
+        // Tạo sẵn một số câu chúc bay lượn ban đầu cho đẹp mắt
+        const defaultWishes = [
+            "Happy Birthday! 🎂", 
+            "Tuổi mới hay an mau lon nhe! ✨", 
+            "Ngày càng bá khí nha Trang", 
+            "Luôn xinh đẹp và vui vẻ nha! ❤️", 
+            "Ngày càng học giỏiii 🎈",
+            "Mong những điều tốt đẹp nhất sẽ đến với Trang!! 🌟"
+        ];
+        
+        defaultWishes.forEach(wish => {
+            // Tạo mỗi câu 2 lần ở các vị trí khác nhau để màn hình phong phú
+            createTextBubble(wish, true);
+            createTextBubble(wish, true);
+        });
+
+        // Hàm xử lý khi người dùng nhập chữ mới và nhấn nút
+        function addNewWish() {
+            const input = document.getElementById('wishInput');
+            const txt = input.value.trim();
+            
+            if(txt !== "") {
+                // Tạo câu chữ bay mới tinh từ dưới lên ngay lập tức
+                createTextBubble(txt, false);
+                // Xóa trống ô nhập để người dùng nhập tiếp câu khác
+                input.value = "";
+                input.placeholder = "Đã thả chữ! Nhập thêm câu khác...";
+            }
+        }
+    </script>
+</body>
+</html>
